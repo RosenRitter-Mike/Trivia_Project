@@ -1,6 +1,7 @@
 import getpass
 import re
-import datetime
+# import datetime
+from datetime import datetime
 import psycopg2
 import psycopg2.extras
 
@@ -54,8 +55,15 @@ def close_db(connection, cursor):
 def create_new_player() -> None:
     while True:
         user = input("Enter username: ")
-        pwd = getpass.getpass(f"User Name: {user}\nEnter your password: ")
-        pwd2 = getpass.getpass("Please enter the password again: ")
+        print("Username input accepted")
+        try:
+            # pwd = getpass.getpass(f"User Name: {user}\nEnter your password: ")
+            # pwd2 = getpass.getpass("Please enter the password again: ")
+            pwd = input(f"User Name: {user}\nEnter your password: ")
+            pwd2 = input("Please enter the password again: ")
+        except Exception as e:
+            print(f"Error with password input: {e}")
+            return  # Exit if there’s an error in password entry
 
         if pwd == pwd2:
             email = input("Enter your email: ")
@@ -64,9 +72,13 @@ def create_new_player() -> None:
                 print("Invalid email address.")
                 continue
 
-            age = int(input("Enter your age: "))
-            if age < 3 or age > 125:
-                print("Invalid age.")
+            try:
+                age = int(input("Enter your age: "))
+                if age < 3 or age > 125:
+                    print("Invalid age.")
+                    continue
+            except ValueError:
+                print("Age must be a number.")
                 continue
 
             print("Welcome!!!")
@@ -89,7 +101,6 @@ def create_new_player() -> None:
             print(f"Error inserting new player: {error}")
         finally:
             close_db(connection, cursor)
-
 
 def login_player(user: str, pwd: str) -> None:
     connection, cursor = connect_db()
@@ -230,45 +241,45 @@ def stats_menu()->None:
     None
     '''
     print("work in progress...")
-    while True:
-        print("===========Main Menu==============")
-        print(
-            "0 - number of players\n1 - question with most right answers\n2 - question with most wrong answers\n"
-            "3 - players list ordered by right answers\n4 - players ordered by questions answered\n5 - player stats\n"
-            "6 - question stats\n\n999 - exit");
-        try:
-            action: int = int(input("What data is required? "));
-            match action:
-                case 0:
-
-                case 1:
-
-                case 2:
-
-                case 3:
-
-                case 4:
-
-                case 5:
-
-                case 6:
-
-                case 999:
-                    print("leaving the stats menu, have a nice day!")
-                    break;
-                case _:
-                    print("invalid input");
-                    continue;
-
-            print();
-
-        except TypeError as e:
-            print(f"{str(e)} - is not a valid input");
-
-        except Exception as e:
-            print(f"{e} - error has occurred");
-        finally:
-            print("Have a great day!")
+    # while True:
+    #     print("===========Main Menu==============")
+    #     print(
+    #         "0 - number of players\n1 - question with most right answers\n2 - question with most wrong answers\n"
+    #         "3 - players list ordered by right answers\n4 - players ordered by questions answered\n5 - player stats\n"
+    #         "6 - question stats\n\n999 - exit");
+    #     try:
+    #         action: int = int(input("What data is required? "));
+    #         match action:
+    #             case 0:
+    #
+    #             case 1:
+    #
+    #             case 2:
+    #
+    #             case 3:
+    #
+    #             case 4:
+    #
+    #             case 5:
+    #
+    #             case 6:
+    #
+    #             case 999:
+    #                 print("leaving the stats menu, have a nice day!")
+    #                 break;
+    #             case _:
+    #                 print("invalid input");
+    #                 continue;
+    #
+    #         print();
+    #
+    #     except TypeError as e:
+    #         print(f"{str(e)} - is not a valid input");
+    #
+    #     except Exception as e:
+    #         print(f"{e} - error has occurred");
+    #     finally:
+    #         print("Have a great day!")
 
 def main_menu()->None:
     '''
@@ -288,7 +299,9 @@ def main_menu()->None:
                 case 0:
                     create_new_player()
                 case 1:
-                    login_player();
+                    name = input("username: ")
+                    pwd = input("password: ")
+                    login_player(name, pwd);
                 case 2:
                     stats_menu();
 
