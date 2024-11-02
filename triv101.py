@@ -163,43 +163,6 @@ def play_game(player_id: int) -> None:
         close_db(connection, cursor)
 
 
-# def get_question(answered: int, player_id: int) -> None:
-#     while answered < 20:
-#         connection, cursor = connect_db()
-#         if connection and cursor:
-#             select_query_str = "SELECT question_text, answer_a, answer_b, answer_c, answer_d FROM questions WHERE question_id = %s"
-#             question = select_query(cursor, select_query_str, (answered,))
-#
-#             if question:
-#                 question = question[0]
-#                 print(f"Q: {question['question_text']}")
-#                 print(
-#                     f"A: {question['answer_a']}, B: {question['answer_b']}, C: {question['answer_c']}, D: {question['answer_d']}")
-#
-#                 u_answer = input("What is your answer? ")
-#
-#                 select_answer = "SELECT correct_answer FROM questions WHERE question_id = %s"
-#                 correct_answer = select_query(cursor, select_answer, (answered,))
-#
-#                 if correct_answer and u_answer == correct_answer[0]['correct_answer']:
-#                     is_correct = True
-#                 else:
-#                     is_correct = False
-#
-#                 insert_str = """INSERT INTO player_answers (player_id, question_id, selected_answer, is_correct)
-#                                       VALUES (%s, %s, %s, %s);"""
-#                 insert_values = (player_id, answered, u_answer, is_correct)
-#                 upsert_query(cursor, insert_str, insert_values)
-#
-#                 answered += 1
-#
-#             print("You have completed the game!")
-#             # Logic for updating high scores can go here.
-#             upsert_high_scores(player_id)
-#
-#             connection.commit()
-#             close_db(connection, cursor)
-
 def get_question(answered: int, player_id: int) -> None:
     while answered < 20:
         connection, cursor = connect_db()
@@ -239,8 +202,11 @@ def get_question(answered: int, player_id: int) -> None:
             elif p_answer.upper() == 'Q':
                 main_menu();
             elif p_answer.upper() == 'S':
-                print("player stats place holder... work in progress")
+                # print("player stats place holder... work in progress")
+                select_query_str = "SELECT pcor_cnt FROM player_correct_count WHERE player_id = %s"
+                c_ans = select_query(cursor, select_query_str, (player_id,))
             else:
+                print("please answer again")
                 continue
 
             connection.commit()
