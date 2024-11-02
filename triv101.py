@@ -102,6 +102,7 @@ def create_new_player() -> None:
         finally:
             close_db(connection, cursor)
 
+
 def login_player(user: str, pwd: str) -> None:
     connection, cursor = connect_db()
     if connection and cursor:
@@ -110,15 +111,21 @@ def login_player(user: str, pwd: str) -> None:
 
         if result and result[0]['password'] == pwd:
             player_id = result[0]['player_id']
-            choice = input("Continue from previous game session? (Y/N): ").upper()
+            # choice = input("Continue from previous game session? (Y/N): ").upper()
+            choice = input("Start a new game? (Y/N): ").upper()
 
             if choice == 'Y':
+                update_query_str = "UPDATE players SET questions_solved = 0 WHERE player_id = %s"
+                upsert_query(cursor, update_query_str, (player_id,))
                 play_game(player_id)
+
+                # play_game(player_id)
             else:
-                choice = input("Start a new game? (Y/N): ").upper()
+                # choice = input("Start a new game? (Y/N): ").upper()
+                choice = input("Continue from previous game session? (Y/N): ").upper()
                 if choice == 'Y':
-                    update_query_str = "UPDATE players SET questions_solved = 0 WHERE player_id = %s"
-                    upsert_query(cursor, update_query_str, (player_id,))
+                    # update_query_str = "UPDATE players SET questions_solved = 0 WHERE player_id = %s"
+                    # upsert_query(cursor, update_query_str, (player_id,))
                     play_game(player_id)
                 else:
                     print(f"Goodbye, {user}!")
@@ -127,7 +134,8 @@ def login_player(user: str, pwd: str) -> None:
             retry_choice = input("Try again? (Y/N): ").upper()
             if retry_choice == 'Y':
                 user1 = input("Enter username: ")
-                pwd1 = getpass.getpass(f"User Name: {user1}\nEnter your password: ")
+                # pwd1 = getpass.getpass(f"User Name: {user1}\nEnter your password: ")
+                pwd1 = input(f"User Name: {user1}\nEnter your password: ")
                 login_player(user1, pwd1)
             else:
                 return
@@ -139,52 +147,107 @@ def login_player(user: str, pwd: str) -> None:
 def play_game(player_id: int) -> None:
     connection, cursor = connect_db()
     if connection and cursor:
+
         select_query_str = "SELECT questions_solved FROM players WHERE player_id = %s"
         result = select_query(cursor, select_query_str, (player_id,))
+
         if result:
-            answered = result[0]['questions_solved']
-            get_question(answered, player_id)
+            answered = result[0]['questions_solved'] + 1
+        else:
+            answered = 0
+
+        print(f"Starting game with {answered} questions answered so far.")
+        get_question(answered + 1, player_id)
 
         connection.commit()
         close_db(connection, cursor)
 
 
+# def get_question(answered: int, player_id: int) -> None:
+#     while answered < 20:
+#         connection, cursor = connect_db()
+#         if connection and cursor:
+#             select_query_str = "SELECT question_text, answer_a, answer_b, answer_c, answer_d FROM questions WHERE question_id = %s"
+#             question = select_query(cursor, select_query_str, (answered,))
+#
+#             if question:
+#                 question = question[0]
+#                 print(f"Q: {question['question_text']}")
+#                 print(
+#                     f"A: {question['answer_a']}, B: {question['answer_b']}, C: {question['answer_c']}, D: {question['answer_d']}")
+#
+#                 u_answer = input("What is your answer? ")
+#
+#                 select_answer = "SELECT correct_answer FROM questions WHERE question_id = %s"
+#                 correct_answer = select_query(cursor, select_answer, (answered,))
+#
+#                 if correct_answer and u_answer == correct_answer[0]['correct_answer']:
+#                     is_correct = True
+#                 else:
+#                     is_correct = False
+#
+#                 insert_str = """INSERT INTO player_answers (player_id, question_id, selected_answer, is_correct)
+#                                       VALUES (%s, %s, %s, %s);"""
+#                 insert_values = (player_id, answered, u_answer, is_correct)
+#                 upsert_query(cursor, insert_str, insert_values)
+#
+#                 answered += 1
+#
+#             print("You have completed the game!")
+#             # Logic for updating high scores can go here.
+#             upsert_high_scores(player_id)
+#
+#             connection.commit()
+#             close_db(connection, cursor)
+
 def get_question(answered: int, player_id: int) -> None:
     while answered < 20:
         connection, cursor = connect_db()
         if connection and cursor:
+            print(f"Fetching question ID: {answered}")
             select_query_str = "SELECT question_text, answer_a, answer_b, answer_c, answer_d FROM questions WHERE question_id = %s"
             question = select_query(cursor, select_query_str, (answered,))
 
-            if question:
-                question = question[0]
-                print(f"Q: {question['question_text']}")
-                print(
-                    f"A: {question['answer_a']}, B: {question['answer_b']}, C: {question['answer_c']}, D: {question['answer_d']}")
+            if not question:
+                print("No question found for the given question ID.")
+                break
 
-                u_answer = input("What is your answer? ")
+            question = question[0]
+            print(f"Q: {question['question_text']}")
+            print(
+                f"A: {question['answer_a']}, B: {question['answer_b']}, C: {question['answer_c']}, D: {question['answer_d']}")
+
+            p_answer = input("your answer: ");
+
+            if p_answer.upper() != 'Q' and p_answer.upper() != 'S':
 
                 select_answer = "SELECT correct_answer FROM questions WHERE question_id = %s"
                 correct_answer = select_query(cursor, select_answer, (answered,))
 
-                if correct_answer and u_answer == correct_answer[0]['correct_answer']:
+                if correct_answer and p_answer.lower() == correct_answer[0]['correct_answer']:
                     is_correct = True
                 else:
                     is_correct = False
 
                 insert_str = """INSERT INTO player_answers (player_id, question_id, selected_answer, is_correct)
                                       VALUES (%s, %s, %s, %s);"""
-                insert_values = (player_id, answered, u_answer, is_correct)
+                insert_values = (player_id, answered, p_answer, is_correct)
                 upsert_query(cursor, insert_str, insert_values)
 
-                answered += 1
+                get_question(answered + 1, player_id);
 
-            print("You have completed the game!")
-            # Logic for updating high scores can go here.
-            upsert_high_scores(player_id)
+            elif p_answer.upper() == 'Q':
+                main_menu();
+            elif p_answer.upper() == 'S':
+                print("player stats place holder... work in progress")
+            else:
+                continue
 
             connection.commit()
             close_db(connection, cursor)
+
+    print("You have completed the game!")
+    upsert_high_scores(player_id)
 
 
 def upsert_high_scores(player_id: int) -> None:
@@ -204,9 +267,13 @@ def upsert_high_scores(player_id: int) -> None:
                 upsert_query(cursor, update_str, (achieved_at, player_id))
             # Otherwise, insert a new high score record
             else:
-                insert_str = """INSERT INTO high_scores (player_id, achieved_at) 
-                                VALUES (%s, %s);"""
-                upsert_query(cursor, insert_str, (player_id, achieved_at))
+                select_max_id = "SELECT COALESCE(MAX(score_id), 0) + 1 FROM high_scores"
+                cursor.execute(select_max_id)
+                new_score_id = cursor.fetchone()[0]
+
+                insert_str = """INSERT INTO high_scores (score_id, player_id, achieved_at) 
+                                VALUES (%s, %s, %s);"""
+                upsert_query(cursor, insert_str, (new_score_id, player_id, achieved_at))
 
             # Fetch and display the top 20 high scores
             select_str = '''
@@ -219,7 +286,8 @@ def upsert_high_scores(player_id: int) -> None:
                     WHERE is_correct = True
                     GROUP BY player_id
                 ) sc USING(player_id)
-                ORDER BY score DESC, achieved_at DESC 
+                GROUP BY p.player_id, hs.achieved_at
+                ORDER BY score DESC, hs.achieved_at DESC 
                 LIMIT 20;
             '''
             high_scores = select_query(cursor, select_str)
@@ -234,7 +302,8 @@ def upsert_high_scores(player_id: int) -> None:
     finally:
         close_db(connection, cursor)
 
-def stats_menu()->None:
+
+def stats_menu() -> None:
     '''
     Opens the statistics manu of the trivia. Allows statistics menu actions
     :return:
@@ -281,7 +350,8 @@ def stats_menu()->None:
     #     finally:
     #         print("Have a great day!")
 
-def main_menu()->None:
+
+def main_menu() -> None:
     '''
     Opens the main manu of the trivia. Allows main menu actions
     :return:
@@ -321,4 +391,3 @@ def main_menu()->None:
             print(f"{e} - error has occurred");
         finally:
             print("Have a great day!")
-
