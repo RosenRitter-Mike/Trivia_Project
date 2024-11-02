@@ -224,7 +224,51 @@ def upsert_high_scores(player_id: int) -> None:
         close_db(connection, cursor)
 
 def stats_menu()->None:
+    '''
+    Opens the statistics manu of the trivia. Allows statistics menu actions
+    :return:
+    None
+    '''
     print("work in progress...")
+    while True:
+        print("===========Main Menu==============")
+        print(
+            "0 - number of players\n1 - question with most right answers\n2 - question with most wrong answers\n"
+            "3 - players list ordered by right answers\n4 - players ordered by questions answered\n5 - player stats\n"
+            "6 - question stats\n\n999 - exit");
+        try:
+            action: int = int(input("What data is required? "));
+            match action:
+                case 0:
+
+                case 1:
+
+                case 2:
+
+                case 3:
+
+                case 4:
+
+                case 5:
+
+                case 6:
+
+                case 999:
+                    print("leaving the stats menu, have a nice day!")
+                    break;
+                case _:
+                    print("invalid input");
+                    continue;
+
+            print();
+
+        except TypeError as e:
+            print(f"{str(e)} - is not a valid input");
+
+        except Exception as e:
+            print(f"{e} - error has occurred");
+        finally:
+            print("Have a great day!")
 
 def main_menu()->None:
     '''
