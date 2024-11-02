@@ -205,6 +205,10 @@ def get_question(answered: int, player_id: int) -> None:
                 # print("player stats place holder... work in progress")
                 select_query_str = "SELECT pcor_cnt FROM player_correct_count WHERE player_id = %s"
                 c_ans = select_query(cursor, select_query_str, (player_id,))
+                select_query_str = "SELECT pwr_cnt FROM player_wrong_count WHERE player_id = %s"
+                w_ans = select_query(cursor, select_query_str, (player_id,))
+                print(f"You answered {c_ans} questions correctly, and {w_ans} of your answers are wrong")
+                continue
             else:
                 print("please answer again")
                 continue
