@@ -223,6 +223,45 @@ def upsert_high_scores(player_id: int) -> None:
     finally:
         close_db(connection, cursor)
 
+def stats_menu()->None:
+    print("work in progress...")
 
 def main_menu()->None:
+    '''
+    Opens the main manu of the trivia. Allows main menu actions
+    :return:
+    None
+    '''
+
+    # action: int = None;
+    while True:
+        print("===========Main Menu==============")
+        print(
+            "0 - register new player\n1 - login existing\n2 - view statistics\n999 - exit");
+        try:
+            action: int = int(input("What is the purpose of your visit? "));
+            match action:
+                case 0:
+                    create_new_player()
+                case 1:
+                    login_player();
+                case 2:
+                    stats_menu();
+
+                case 999:
+                    print("leaving the system, have a nice day!")
+                    break;
+                case _:
+                    print("invalid input");
+                    continue;
+
+            print();
+
+        except TypeError as e:
+            print(f"{str(e)} - is not a valid input");
+
+        except Exception as e:
+            print(f"{e} - error has occurred");
+        finally:
+            print("Have a great day!")
 
