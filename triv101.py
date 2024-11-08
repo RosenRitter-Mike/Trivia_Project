@@ -282,19 +282,37 @@ def stats_menu() -> None:
     None
     '''
     print("work in progress...")
-    # while True:
-    #     print("===========Stats Menu==============")
-    #     print(
-    #         "0 - number of players\n1 - question with most right answers\n2 - question with most wrong answers\n"
-    #         "3 - players list ordered by right answers\n4 - players ordered by questions answered\n5 - player stats\n"
-    #         "6 - question stats\n\n999 - exit");
-    #     try:
-    #         action: int = int(input("What data is required? "));
-    #         match action:
-    #             case 0:
-    #
-    #             case 1:
-    #
+    while True:
+        print("===========Stats Menu==============")
+        print(
+            "0 - number of players\n1 - question with most right answers\n2 - question with most wrong answers\n"
+            "3 - players list ordered by right answers\n4 - players ordered by questions answered\n5 - player stats\n"
+            "6 - question stats\n\n999 - exit");
+        try:
+            action: int = int(input("What data is required? "));
+            match action:
+                case 0:
+                    connection, cursor = connect_db()
+
+                    try:
+                        if connection and cursor:
+                            select_str = "select count(distinct player_id) from players"
+                            result = select_query(cursor, select_str);
+                            print(f"Number of players = {result}");
+                        connection.commit()
+                    finally:
+                        close_db(connection, cursor);
+                case 1:
+                    connection, cursor = connect_db()
+
+                    try:
+                        if connection and cursor:
+                            select_str = "select question_id, max(cor_cnt) from question_correct_count"
+                            result = select_query(cursor, select_str);
+                            print(f"Question with most correct answers = {result}");
+                         connection.commit()
+                    finally:
+                        close_db(connection, cursor);
     #             case 2:
     #
     #             case 3:
@@ -308,19 +326,19 @@ def stats_menu() -> None:
     #             case 999:
     #                 print("leaving the stats menu, have a nice day!")
     #                 break;
-    #             case _:
-    #                 print("invalid input");
-    #                 continue;
-    #
-    #         print();
-    #
-    #     except TypeError as e:
-    #         print(f"{str(e)} - is not a valid input");
-    #
-    #     except Exception as e:
-    #         print(f"{e} - error has occurred");
-    #     finally:
-    #         print("Have a great day!")
+                case _:
+                    print("invalid input");
+                    continue;
+
+            print();
+
+        except TypeError as e:
+            print(f"{str(e)} - is not a valid input");
+
+        except Exception as e:
+            print(f"{e} - error has occurred");
+        finally:
+            print("Have a great day!")
 
 
 def main_menu() -> None:
