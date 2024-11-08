@@ -310,11 +310,20 @@ def stats_menu() -> None:
                             select_str = "select question_id, max(cor_cnt) from question_correct_count"
                             result = select_query(cursor, select_str);
                             print(f"Question with most correct answers = {result}");
-                         connection.commit()
+                        connection.commit()
                     finally:
                         close_db(connection, cursor);
-    #             case 2:
-    #
+                case 2:
+                    connection, cursor = connect_db()
+
+                    try:
+                        if connection and cursor:
+                            select_str = "select question_id, max(wr_cnt) from question_wrong_count"
+                            result = select_query(cursor, select_str);
+                            print(f"Question with most wrong answers = {result}");
+                        connection.commit()
+                    finally:
+                        close_db(connection, cursor);
     #             case 3:
     #
     #             case 4:
@@ -323,9 +332,9 @@ def stats_menu() -> None:
     #
     #             case 6:
     #
-    #             case 999:
-    #                 print("leaving the stats menu, have a nice day!")
-    #                 break;
+                case 999:
+                    print("leaving the stats menu, have a nice day!")
+                    break;
                 case _:
                     print("invalid input");
                     continue;
