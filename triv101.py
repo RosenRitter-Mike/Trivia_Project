@@ -355,7 +355,7 @@ def stats_menu() -> None:
                         if connection and cursor:
 
                             select_str = ("select * from player_stats_id psi "
-                                          "where player_id = 11")
+                                          "where player_id = %s")
                             result = select_query(cursor, select_str, (player_id,))
                             print("player stats", result);
                         connection.commit()
