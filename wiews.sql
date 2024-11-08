@@ -31,10 +31,18 @@
 --GROUP BY player_id
 --ORDER BY pcor_cnt DESC;
 --
-CREATE VIEW player_wrong_count AS
-SELECT player_id, COUNT(*) AS pwr_cnt
-FROM player_answers
-where is_correct = false 
-GROUP BY player_id
-ORDER BY pwr_cnt DESC;
+--CREATE VIEW player_wrong_count AS
+--SELECT player_id, COUNT(*) AS pwr_cnt
+--FROM player_answers
+--where is_correct = false 
+--GROUP BY player_id
+--ORDER BY pwr_cnt DESC;
 --
+CREATE VIEW player_stats_correct AS
+select p.username, cr.cnt as correct
+from players p
+join (select player_id, count(*) cnt
+    from player_answers
+    where is_correct = True
+    group by player_id) as cr using(player_id)
+    order by correct desc

@@ -324,10 +324,30 @@ def stats_menu() -> None:
                         connection.commit()
                     finally:
                         close_db(connection, cursor);
-    #             case 3:
-    #
-    #             case 4:
-    #
+                case 3:
+                    connection, cursor = connect_db()
+
+                    try:
+                        if connection and cursor:
+                            select_str = "select * from player_stats_correct"
+                            result = select_query(cursor, select_str);
+                            print("Player Stats", result);
+                        connection.commit()
+                    finally:
+                        close_db(connection, cursor);
+                case 4:
+                    connection, cursor = connect_db()
+
+                    try:
+                        if connection and cursor:
+                            select_str = ("select username, questions_solved "
+                                          "from players "
+                                          "order by questions_solved desc")
+                            result = select_query(cursor, select_str);
+                            print("players ordered by questions answered", result);
+                        connection.commit()
+                    finally:
+                        close_db(connection, cursor);
     #             case 5:
     #
     #             case 6:
