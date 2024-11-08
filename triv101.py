@@ -348,13 +348,36 @@ def stats_menu() -> None:
                         connection.commit()
                     finally:
                         close_db(connection, cursor);
-    #             case 5:
-    #
-    #             case 6:
-    #
+                case 5:
+                    connection, cursor = connect_db()
+                    player_id = int(input("player id: "));
+                    try:
+                        if connection and cursor:
+
+                            select_str = ("select * from player_stats_id psi "
+                                          "where player_id = 11")
+                            result = select_query(cursor, select_str, (player_id,))
+                            print("player stats", result);
+                        connection.commit()
+                    finally:
+                        close_db(connection, cursor);
+
+                case 6:
+                    connection, cursor = connect_db()
+
+                    try:
+                        if connection and cursor:
+                            select_str = "select * from question_stats"
+                            result = select_query(cursor, select_str);
+                            print("Question statistics", result);
+                        connection.commit()
+                    finally:
+                        close_db(connection, cursor);
+
                 case 999:
                     print("leaving the stats menu, have a nice day!")
                     break;
+
                 case _:
                     print("invalid input");
                     continue;
