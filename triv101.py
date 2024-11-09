@@ -279,18 +279,18 @@ def create_pie(player_id: int) -> None:
     connection, cursor = connect_db()
     try:
         if connection and cursor:
-            select_str = "SELECT username, correct, wrong FROM player_stats_id WHERE player_id = %s"
+            select_str = "SELECT username, correct_answers, wrong_answers FROM player_stats_id WHERE player_id = %s"
             result = select_query(cursor, select_str, (player_id,))
 
             if result:
-                correct = result[0]['correct']
-                wrong = result[0]['wrong']
+                correct = result[0]['correct_answers']
+                wrong = result[0]['wrong_answers']
                 unanswered = 20 - correct - wrong
                 username = result[0]['username']
 
                 labels = ['Correct', 'Wrong', 'Unanswered']
                 sizes = [correct, wrong, unanswered]
-                colors = sns.color_palette('bright')[:3]
+                colors = ['#50C878', '#DC143C', '#007FFF']
 
                 explode = [0.1, 0, 0]
 
@@ -317,6 +317,11 @@ def create_bar() -> None:
 
             if result:
                 df = pd.DataFrame(result)
+
+                print("Column names in DataFrame:", df.columns)
+                print(df.head())
+
+                df.columns = ['question_text', 'answered', 'correct_answers', 'wrong_answers']
 
                 df_melted = df.melt(id_vars='question_text',
                                     value_vars=['answered', 'correct_answers', 'wrong_answers'],
@@ -364,7 +369,7 @@ def stats_menu() -> None:
                         if connection and cursor:
                             select_str = "select count(distinct player_id) from players"
                             result = select_query(cursor, select_str);
-                            print(f"Number of players = {result}");
+                            print(f"Number of players = {result[0][0]}");
                         connection.commit()
                     finally:
                         close_db(connection, cursor);
@@ -373,7 +378,9 @@ def stats_menu() -> None:
 
                     try:
                         if connection and cursor:
-                            select_str = "select question_id, max(cor_cnt) from question_correct_count"
+                            select_str = ("select question_id from question_correct_count"
+                                          " where cor_cnt = (select max(cor_cnt) from question_correct_count)"
+                                          " group by question_id")
                             result = select_query(cursor, select_str);
                             print(f"Question with most correct answers = {result}");
                         connection.commit()
@@ -384,7 +391,10 @@ def stats_menu() -> None:
 
                     try:
                         if connection and cursor:
-                            select_str = "select question_id, max(wr_cnt) from question_wrong_count"
+                            select_str = ("select question_id from question_wrong_count"
+                                          " where wr_cnt = (select max(wr_cnt) from question_wrong_count)"
+                                          " group by question_id")
+
                             result = select_query(cursor, select_str);
                             print(f"Question with most wrong answers = {result}");
                         connection.commit()
@@ -430,7 +440,6 @@ def stats_menu() -> None:
 
                 case 6:
                     connection, cursor = connect_db()
-                    create_bar();
                     try:
                         if connection and cursor:
                             select_str = "select * from question_stats"
@@ -439,6 +448,7 @@ def stats_menu() -> None:
                         connection.commit()
                     finally:
                         close_db(connection, cursor);
+                        create_bar();
 
                 case 999:
                     print("leaving the stats menu, have a nice day!")
