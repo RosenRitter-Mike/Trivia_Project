@@ -4,6 +4,10 @@ import re
 from datetime import datetime
 import psycopg2
 import psycopg2.extras
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import pandas as pd
 
 
 # Helper Functions for Database Operations
@@ -227,17 +231,14 @@ def upsert_high_scores(player_id: int) -> None:
 
     try:
         if connection and cursor:
-            # Check if the player already has a high score
             select_str = "SELECT * FROM high_scores WHERE player_id = %s"
             exists = select_query(cursor, select_str, (player_id,))
 
             achieved_at = datetime.now()
 
-            # If the high score exists, update it
             if exists:
                 update_str = "UPDATE high_scores SET achieved_at = %s WHERE player_id = %s"
                 upsert_query(cursor, update_str, (achieved_at, player_id))
-            # Otherwise, insert a new high score record
             else:
                 select_max_id = "SELECT COALESCE(MAX(score_id), 0) + 1 FROM high_scores"
                 cursor.execute(select_max_id)
@@ -247,7 +248,6 @@ def upsert_high_scores(player_id: int) -> None:
                                 VALUES (%s, %s, %s);"""
                 upsert_query(cursor, insert_str, (new_score_id, player_id, achieved_at))
 
-            # Fetch and display the top 20 high scores
             select_str = '''
                 SELECT p.player_id, p.username, p.email, COUNT(sc.*) as score, hs.achieved_at
                 FROM high_scores hs
@@ -271,6 +271,72 @@ def upsert_high_scores(player_id: int) -> None:
                     print(scores_dict)
 
             connection.commit()
+    finally:
+        close_db(connection, cursor)
+
+
+def create_pie(player_id: int) -> None:
+    connection, cursor = connect_db()
+    try:
+        if connection and cursor:
+            select_str = "SELECT username, correct, wrong FROM player_stats_id WHERE player_id = %s"
+            result = select_query(cursor, select_str, (player_id,))
+
+            if result:
+                correct = result[0]['correct']
+                wrong = result[0]['wrong']
+                unanswered = 20 - correct - wrong
+                username = result[0]['username']
+
+                labels = ['Correct', 'Wrong', 'Unanswered']
+                sizes = [correct, wrong, unanswered]
+                colors = sns.color_palette('bright')[:3]
+
+                explode = [0.1, 0, 0]
+
+                plt.figure(figsize=(6, 6))
+                plt.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+                        startangle=140, colors=colors, wedgeprops={'edgecolor': 'black'})
+
+                plt.title(f"Player {username} - Answer Distribution")
+                plt.show()
+            else:
+                print(f"No stats found for player ID {player_id}.")
+
+        connection.commit()
+    finally:
+        close_db(connection, cursor)
+
+
+def create_bar() -> None:
+    connection, cursor = connect_db()
+    try:
+        if connection and cursor:
+            select_str = "SELECT question_text, answered, correct_answers, wrong_answers FROM question_stats"
+            result = select_query(cursor, select_str)
+
+            if result:
+                df = pd.DataFrame(result)
+
+                df_melted = df.melt(id_vars='question_text',
+                                    value_vars=['answered', 'correct_answers', 'wrong_answers'],
+                                    var_name='Answer Type', value_name='Count')
+
+                plt.figure(figsize=(12, 8))
+                sns.barplot(x='question_text', y='Count', hue='Answer Type', data=df_melted, palette='bright')
+
+                plt.title("Question Answer Statistics")
+                plt.xlabel("Questions")
+                plt.ylabel("Count")
+                plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for readability
+                plt.legend(title='Answer Type')
+                plt.tight_layout()
+
+                plt.show()
+            else:
+                print("No data found in question_stats.")
+
+        connection.commit()
     finally:
         close_db(connection, cursor)
 
@@ -351,9 +417,9 @@ def stats_menu() -> None:
                 case 5:
                     connection, cursor = connect_db()
                     player_id = int(input("player id: "));
+                    create_pie(player_id);
                     try:
                         if connection and cursor:
-
                             select_str = ("select * from player_stats_id psi "
                                           "where player_id = %s")
                             result = select_query(cursor, select_str, (player_id,))
@@ -364,7 +430,7 @@ def stats_menu() -> None:
 
                 case 6:
                     connection, cursor = connect_db()
-
+                    create_bar();
                     try:
                         if connection and cursor:
                             select_str = "select * from question_stats"
