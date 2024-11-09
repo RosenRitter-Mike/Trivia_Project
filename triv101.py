@@ -271,6 +271,32 @@ def upsert_high_scores(player_id: int) -> None:
         close_db(connection, cursor)
 
 
+def display_player_answers(player_id: int) -> None:
+    connection, cursor = connect_db()
+    try:
+        if connection and cursor:
+            select_str = """
+                SELECT q.question_text, pa.is_correct
+                FROM player_answers pa
+                JOIN questions q ON pa.question_id = q.question_id
+                WHERE pa.player_id = %s
+            """
+            result = select_query(cursor, select_str, (player_id,))
+
+            if result:
+                print(f"Player ID: {player_id}'s Question Performance:")
+                for row in result:
+                    question_text = row['question_text']
+                    is_correct = "Correct" if row['is_correct'] else "Incorrect"
+                    print(f"Q: {question_text} - {is_correct}")
+            else:
+                print(f"No answers found for player_id {player_id}")
+
+        connection.commit()
+    finally:
+        close_db(connection, cursor)
+
+
 def create_pie(player_id: int) -> None:
     connection, cursor = connect_db()
     try:
@@ -424,6 +450,7 @@ def stats_menu() -> None:
                     connection, cursor = connect_db()
                     player_id = int(input("player id: "));
                     create_pie(player_id);
+                    display_player_answers(player_id);
                     try:
                         if connection and cursor:
                             select_str = ("select * from player_stats_id psi "
