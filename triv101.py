@@ -52,8 +52,6 @@ def close_db(connection, cursor):
         connection.close()
 
 
-# Main Functions
-
 def create_new_player() -> None:
     while True:
         user = input("Enter username: ")
