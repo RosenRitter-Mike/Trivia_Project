@@ -10,8 +10,6 @@ import numpy as np
 import pandas as pd
 
 
-# Helper Functions for Database Operations
-
 def connect_db():
     try:
         connection = psycopg2.connect(
@@ -333,7 +331,7 @@ def create_bar() -> None:
                 plt.title("Question Answer Statistics")
                 plt.xlabel("Questions")
                 plt.ylabel("Count")
-                plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for readability
+                plt.xticks(rotation=45, ha='right')
                 plt.legend(title='Answer Type')
                 plt.tight_layout()
 
