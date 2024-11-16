@@ -10,7 +10,14 @@ import numpy as np
 import pandas as pd
 
 
-def connect_db():
+def connect_db() -> tuple:
+    '''
+    Establishes a connection to the PostgreSQL database
+    and returns the connection object and a cursor for executing queries.
+    :return:
+    A tuple containing the database connection object and a cursor with dictionary-like access to rows.
+    Returns (None, None) if the connection fails.
+    '''
     try:
         connection = psycopg2.connect(
             host="localhost",
@@ -26,7 +33,18 @@ def connect_db():
         return None, None
 
 
-def select_query(cursor, query, params=None):
+def select_query(cursor, query, params=None) -> list | None:
+    '''
+    Executes a SELECT query using the provided cursor and optional parameters, returning all matching rows.
+    :param cursor:
+    The database cursor object used to execute queries.
+    :param query:
+    A SQL query string (typically a SELECT statement).
+    :param params:
+    Optional tuple of parameters to substitute into the query.
+    :return:
+    A list of rows fetched by the query. Returns None if an error occurs.
+    '''
     try:
         if params:
             cursor.execute(query, params)
@@ -38,14 +56,34 @@ def select_query(cursor, query, params=None):
         return None
 
 
-def upsert_query(cursor, query, params):
+def upsert_query(cursor, query, params) -> None:
+    '''
+    Executes an UPSERT (INSERT or UPDATE) query using the provided cursor and parameters.
+    :param cursor:
+    The database cursor object used to execute queries.
+    :param query:
+    A SQL query string (typically an INSERT or UPDATE statement).
+    :param params:
+    A tuple of parameters to substitute into the query.
+    :return:
+    None
+    '''
     try:
         cursor.execute(query, params)
     except Exception as error:
         print(f"Error executing UPSERT query: {error}")
 
 
-def close_db(connection, cursor):
+def close_db(connection, cursor) -> None:
+    '''
+    Safely closes the database cursor and connection to release resources.
+    :param connection:
+    The active database connection object.
+    :param cursor:
+    The active cursor object.
+    :return:
+    None.
+    '''
     if cursor:
         cursor.close()
     if connection:
@@ -53,6 +91,11 @@ def close_db(connection, cursor):
 
 
 def create_new_player() -> None:
+    '''
+    Create new player in the system, with a new username and password.
+    :return:
+    None
+    '''
     while True:
         user = input("Enter username: ")
         print("Username input accepted")
@@ -104,6 +147,15 @@ def create_new_player() -> None:
 
 
 def login_player(user: str, pwd: str) -> None:
+    '''
+    Login existing player into the game.
+    :param user:
+    username used to identify the user
+    :param pwd:
+    password used to varify that the player is indeed the one with the username given before
+    :return:
+    None
+    '''
     connection, cursor = connect_db()
     if connection and cursor:
         select_query_str = "SELECT player_id, password FROM players WHERE username = %s"
@@ -145,6 +197,14 @@ def login_player(user: str, pwd: str) -> None:
 
 
 def play_game(player_id: int) -> None:
+    '''
+    Initializes and manages the gameplay session for a specific player by determining their progress
+    and starting the question-answering sequence.
+    :param player_id:
+    An integer identifying the player.
+    :return:
+    None
+    '''
     connection, cursor = connect_db()
     if connection and cursor:
 
@@ -164,6 +224,18 @@ def play_game(player_id: int) -> None:
 
 
 def get_question(answered: int, player_id: int) -> None:
+    '''
+    Handles the game logic for presenting questions to the player, collecting answers,
+    and updating the database with the player's progress and performance.
+    :param answered:
+    An integer representing the ID of the question from which the player continues.
+    Starts from this question and proceeds sequentially.
+    :param player_id:
+    An integer identifying the player. Used to track and update the player's
+    game progress and statistics.
+    :return:
+    None
+    '''
     connection, cursor = connect_db()
     if connection and cursor:
         try:
@@ -223,6 +295,14 @@ def get_question(answered: int, player_id: int) -> None:
 
 
 def upsert_high_scores(player_id: int) -> None:
+    '''
+    Updates or inserts a player's high score in the "high_scores" table at the end of a game session.
+    Also, retrieves and displays the top 20 high scores.
+    :param player_id:
+    The unique identifier of the player whose score is being processed.
+    :return:
+    None
+    '''
     connection, cursor = connect_db()
 
     try:
@@ -272,6 +352,14 @@ def upsert_high_scores(player_id: int) -> None:
 
 
 def display_player_answers(player_id: int) -> None:
+    '''
+    Displays the statistics (answered, correctly answered, and wrongly answered) of the player selected based on player
+    id received
+    :param player_id:
+    The unique identifier of the player whose stats were requested.
+    :return:
+    None
+    '''
     connection, cursor = connect_db()
     try:
         if connection and cursor:
@@ -298,6 +386,13 @@ def display_player_answers(player_id: int) -> None:
 
 
 def create_pie(player_id: int) -> None:
+    '''
+    Creates a pie chart of the player selected based on player id received
+    :param player_id:
+    The unique identifier of the player whose stats were requested.
+    :return:
+    None
+    '''
     connection, cursor = connect_db()
     try:
         if connection and cursor:
@@ -331,6 +426,11 @@ def create_pie(player_id: int) -> None:
 
 
 def create_bar() -> None:
+    '''
+    Creates bar chart of each question and its answered, correctly answered, and wrongly answered stats
+    :return:
+    None
+    '''
     connection, cursor = connect_db()
     try:
         if connection and cursor:
