@@ -92,11 +92,32 @@
 --('Who is the author of "One Hundred Years of Solitude," a landmark in magical realism?', 'Gabriel García Márquez', 'Jorge Luis Borges', 'Isabel Allende', 'Mario Vargas Llosa', 'a'),
 --('Which Nobel Prize-winning author wrote "The Old Man and the Sea"?', 'Ernest Hemingway', 'William Faulkner', 'Toni Morrison', 'John Steinbeck', 'a');
 
+--INSERT INTO questions (question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
+--VALUES
+--('Which existentialist author wrote "The Stranger" and won the Nobel Prize in Literature in 1957?', 'Albert Camus', 'Jean-Paul Sartre', 'Franz Kafka', 'Simone de Beauvoir', 'a'),
+--('Which powerful Japanese daimyo played a key role in unifying Japan in the late 16th century before his death in 1582?', 'Oda Nobunaga', 'Tokugawa Ieyasu', 'Toyotomi Hideyoshi', 'Uesugi Kenshin', 'a'),
+--('Which band released the album "Ride the Lightning" in 1984, featuring iconic songs such as "Creeping Death" and "Fade to Black"?', 'Metallica', 'Megadeth', 'Slayer', 'Anthrax', 'a'),
+--('Which French military commander is considered one of the greatest tacticians of his time and served under Louis XIV?', 'Henri de Turenne', 'Maurice de Saxe', 'Louis de Bourbon', 'Jean-Baptiste Colbert', 'a'),
+--('Which Apache leader led resistance against Mexico and the United States during the Apache Wars in the late 19th century?', 'Geronimo', 'Cochise', 'Sitting Bull', 'Crazy Horse', 'a'),
+--('Who is the captain of the USS Enterprise-D in the television series "Star Trek: The Next Generation"?', 'Captain Picard', 'Captain Kirk', 'Commander Riker', 'Captain Sisko', 'a');
+
 INSERT INTO questions (question_text, answer_a, answer_b, answer_c, answer_d, correct_answer)
 VALUES
-('Which existentialist author wrote "The Stranger" and won the Nobel Prize in Literature in 1957?', 'Albert Camus', 'Jean-Paul Sartre', 'Franz Kafka', 'Simone de Beauvoir', 'a'),
-('Which powerful Japanese daimyo played a key role in unifying Japan in the late 16th century before his death in 1582?', 'Oda Nobunaga', 'Tokugawa Ieyasu', 'Toyotomi Hideyoshi', 'Uesugi Kenshin', 'a'),
-('Which band released the album "Ride the Lightning" in 1984, featuring iconic songs such as "Creeping Death" and "Fade to Black"?', 'Metallica', 'Megadeth', 'Slayer', 'Anthrax', 'a'),
-('Which French military commander is considered one of the greatest tacticians of his time and served under Louis XIV?', 'Henri de Turenne', 'Maurice de Saxe', 'Louis de Bourbon', 'Jean-Baptiste Colbert', 'a'),
-('Which Apache leader led resistance against Mexico and the United States during the Apache Wars in the late 19th century?', 'Geronimo', 'Cochise', 'Sitting Bull', 'Crazy Horse', 'a'),
-('Who is the captain of the USS Enterprise-D in the television series "Star Trek: The Next Generation"?', 'Captain Picard', 'Captain Kirk', 'Commander Riker', 'Captain Sisko', 'a');
+('Who is known for his role as Emperor of France?', 'Napoleon', 'Alexander the Great', 'Julius Caesar', 'Charlemagne', 'a'),
+('Who led an anarchist movement in Ukraine during the Russian Civil War?', 'Leon Trotsky', 'Nestor Makhno', 'Joseph Stalin', 'Vladimir Lenin', 'b'),
+('Who was a Roman Emperor and Stoic philosopher?', 'Marcus Aurelius', 'Augustus', 'Constantine', 'Trajan', 'a'),
+('Who composed the Brandenburg Concertos?', 'Beethoven', 'Mozart', 'Bach', 'Haydn', 'c'),
+('Who sculpted the famous statue of Apollo and Daphne?', 'Michelangelo', 'Donatello', 'Bernini', 'Rodin', 'c'),
+('Which TV show is known for its long-running satirical take on American life?', 'Family Guy', 'Futurama', 'The Simpsons', 'South Park', 'c'),
+('Which marine animal is also known as a killer whale?', 'Blue Whale', 'Dolphin', 'Orca Whale', 'Shark', 'c'),
+('What is the name of Picasso’s famous anti-war painting?', 'The Persistence of Memory', 'The Scream', 'Guernica', 'Starry Night', 'c'),
+('Which artist is known for his calm demeanor and landscape painting TV series?', 'Bob Ross', 'Jackson Pollock', 'Claude Monet', 'Salvador Dalí', 'a'),
+('Which Ukrainian artist is known for his work in abstraction?', 'Malevich', 'Marchuk', 'Repin', 'Pymonenko', 'b'),
+('Which Ukrainian artist is famous for his realist paintings?', 'Shevchenko', 'Pymonenko', 'Repin', 'Marchuk', 'b'),
+('Who is known as the Great Stephen, a Romanian national hero?', 'Michael the Brave', 'Stephen the Great', 'Vlad Tepes', 'Trajan', 'b'),
+('Who inspired the Dracula legend?', 'Vlad Tepes', 'Radu the Handsome', 'Stephen the Great', 'Michael the Brave', 'a'),
+('Which Greek god is associated with the underworld?', 'Zeus', 'Poseidon', 'Hades', 'Apollo', 'c'),
+('Who is the Egyptian god of mummification and the afterlife?', 'Ra', 'Anubis', 'Osiris', 'Horus', 'b'),
+('Which god is associated with time and was the father of Zeus?', 'Cronos', 'Hades', 'Poseidon', 'Hermes', 'a'),
+('What is the term for the electric potential difference between two points?', 'Current', 'Voltage', 'Resistance', 'Power', 'b');
+
