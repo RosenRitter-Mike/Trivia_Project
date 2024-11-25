@@ -1,6 +1,7 @@
 import triv101 as trv
 
-def main()->None:
+
+def main() -> None:
     trv.main_menu();
 
 
