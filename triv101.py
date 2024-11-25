@@ -11,13 +11,13 @@ import pandas as pd
 
 
 def connect_db() -> tuple:
-    '''
+    """
     Establishes a connection to the PostgreSQL database
     and returns the connection object and a cursor for executing queries.
     :return:
     A tuple containing the database connection object and a cursor with dictionary-like access to rows.
     Returns (None, None) if the connection fails.
-    '''
+    """
     try:
         connection = psycopg2.connect(
             host="localhost",
@@ -197,14 +197,13 @@ def login_player(user: str, pwd: str) -> None:
 
 
 def play_game(player_id: int) -> None:
-    '''
-    Initializes and manages the gameplay session for a specific player by determining their progress
-    and starting the question-answering sequence.
+    """
+    Initializes and manages the gameplay for a player by determining their progress and starting the game.
     :param player_id:
     An integer identifying the player.
     :return:
     None
-    '''
+    """
     connection, cursor = connect_db()
     if connection and cursor:
 
@@ -217,78 +216,120 @@ def play_game(player_id: int) -> None:
             answered = 0
 
         print(f"Starting game with {answered} questions answered so far.")
-        get_question(answered + 1, player_id)
+        get_question(player_id)
 
         connection.commit()
         close_db(connection, cursor)
 
 
-def get_question(answered: int, player_id: int) -> None:
-    '''
+def get_rnd_questions(cursor, player_id: int, limit=20) -> list:
+    """
+    Fetches a list of random question IDs from the questions table
+    :param cursor:
+    The database cursor for executing queries.
+    :param player_id:
+    The player's ID used to check their progress.
+    :param limit:
+    The number of random questions to fetch (default is 20).
+    :return:
+    A list of random question IDs.
+    """
+    select_query_str = "SELECT question_id FROM questions"
+    q_ids = select_query(cursor, select_query_str)
+
+    q_ids = [q['question_id'] for q in q_ids]
+
+    select_answered_query = "SELECT question_id FROM player_answers WHERE player_id = %s"
+    answered_q_ids = select_query(cursor, select_answered_query, (player_id,))
+    answered_q_ids = [q['question_id'] for q in answered_q_ids]
+
+    rem_q_ids = list(set(q_ids) - set(answered_q_ids))
+
+    questions_needed = limit - len(answered_q_ids)
+
+    random_question_ids = np.random.choice(rem_q_ids, size=questions_needed, replace=False).tolist()
+    return random_question_ids
+
+
+def get_question(player_id: int) -> None:
+    """
     Handles the game logic for presenting questions to the player, collecting answers,
     and updating the database with the player's progress and performance.
-    :param answered:
-    An integer representing the ID of the question from which the player continues.
-    Starts from this question and proceeds sequentially.
     :param player_id:
     An integer identifying the player. Used to track and update the player's
     game progress and statistics.
     :return:
     None
-    '''
+    """
     connection, cursor = connect_db()
     if connection and cursor:
         try:
-            while answered < 20:
-                print(f"Fetching question ID: {answered}")
-                select_query_str = "SELECT question_text, answer_a, answer_b, answer_c, answer_d, correct_answer FROM questions WHERE question_id = %s"
-                question = select_query(cursor, select_query_str, (answered,))
+            while True:
+                question_ids = get_rnd_questions(cursor, player_id, limit=20)
 
-                if not question:
-                    print("No question found for the given question ID.")
-                    break
+                for question_id in question_ids:
+                    print(f"Fetching question ID: {question_id}")
+                    select_query_str = """
+                        SELECT question_text, answer_a, answer_b, answer_c, answer_d, correct_answer
+                        FROM questions WHERE question_id = %s
+                    """
+                    question = select_query(cursor, select_query_str, (question_id,))
 
-                question = question[0]
-                print(f"Q: {question['question_text']}")
-                print(
-                    f"A: {question['answer_a']}, B: {question['answer_b']}, C: {question['answer_c']}, D: {question['answer_d']}")
+                    if not question:
+                        print("No question found for the given question ID.")
+                        continue
 
-                p_answer = input("Your answer (or 'Q' to quit, 'S' for stats): ").strip()
+                    question = question[0]
+                    print(f"Q: {question['question_text']}")
+                    print(
+                        f"A: {question['answer_a']}, B: {question['answer_b']}, "
+                        f"C: {question['answer_c']}, D: {question['answer_d']}"
+                    )
 
-                if p_answer.upper() == 'Q':
-                    print("Exiting to main menu...")
-                    main_menu()
-                    return
-                elif p_answer.upper() == 'S':
-                    print("Fetching player stats...")
-                    select_query_str = "SELECT COUNT(*) FROM player_answers WHERE player_id = %s AND is_correct = TRUE"
-                    c_ans = select_query(cursor, select_query_str, (player_id,))[0]['count']
-                    select_query_str = "SELECT COUNT(*) FROM player_answers WHERE player_id = %s AND is_correct = FALSE"
-                    w_ans = select_query(cursor, select_query_str, (player_id,))[0]['count']
-                    print(f"You answered {c_ans} questions correctly, and {w_ans} of your answers are wrong.")
-                    continue
+                    p_answer = input("Your answer (or 'Q' to quit, 'S' for stats): ").strip()
 
-                correct_answer = question['correct_answer']
+                    if p_answer.upper() == 'Q':
+                        print("Exiting to main menu...")
+                        main_menu()
+                        return
+                    elif p_answer.upper() == 'S':
+                        print("Fetching player stats...")
+                        select_query_str = """
+                            SELECT COUNT(*) FROM player_answers WHERE player_id = %s AND is_correct = TRUE
+                        """
+                        c_ans = select_query(cursor, select_query_str, (player_id,))[0]['count']
+                        select_query_str = """
+                            SELECT COUNT(*) FROM player_answers WHERE player_id = %s AND is_correct = FALSE
+                        """
+                        w_ans = select_query(cursor, select_query_str, (player_id,))[0]['count']
+                        print(f"You answered {c_ans} questions correctly, and {w_ans} of your answers are wrong.")
+                        continue
 
-                is_correct = (p_answer.lower() == correct_answer.lower())
-                if is_correct:
-                    print("Correct answer!")
-                else:
-                    print("Wrong answer!")
+                    correct_answer = question['correct_answer']
+                    is_correct = (p_answer.lower() == correct_answer.lower())
 
-                insert_str = """INSERT INTO player_answers (player_id, question_id, selected_answer, is_correct)
-                                VALUES (%s, %s, %s, %s);"""
-                insert_values = (player_id, answered, p_answer, is_correct)
-                upsert_query(cursor, insert_str, insert_values)
+                    if is_correct:
+                        print("Correct answer!")
+                    else:
+                        print("Wrong answer!")
 
-                update_query_str = "UPDATE players SET questions_solved = %s WHERE player_id = %s"
-                upsert_query(cursor, update_query_str, (answered, player_id))
+                    insert_str = """
+                        INSERT INTO player_answers (player_id, question_id, selected_answer, is_correct)
+                        VALUES (%s, %s, %s, %s);
+                    """
+                    insert_values = (player_id, question_id, p_answer, is_correct)
+                    upsert_query(cursor, insert_str, insert_values)
 
-                answered += 1
-                # continue
+                    update_query_str = "UPDATE players SET questions_solved = questions_solved + 1 WHERE player_id = %s"
+                    upsert_query(cursor, update_query_str, (player_id,))
 
-            print("You have completed the game!")
-            upsert_high_scores(player_id)
+                    answered_count_query = "SELECT COUNT(*) FROM player_answers WHERE player_id = %s"
+                    answered_count = select_query(cursor, answered_count_query, (player_id,))[0]['count']
+                    if answered_count >= 20:
+                        print("You have completed the game!")
+                        upsert_high_scores(player_id)
+                        break
+
         finally:
             connection.commit()
             close_db(connection, cursor)
